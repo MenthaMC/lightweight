@@ -4,7 +4,7 @@ plugins {
 }
 
 dependencies {
-    shade(projects.lightweightLib)
+    shade(projects.paperweightLib)
 
     implementation(libs.bundles.kotson)
     implementation(libs.coroutines)
@@ -14,7 +14,7 @@ dependencies {
     implementation(libs.bundles.cadix)
     shade(libs.jgit)
 
-    testImplementation(project(":lightweight-lib", "testClassesJar"))
+    testImplementation(project(":paperweight-lib", "testClassesJar"))
 }
 
 gradlePlugin {

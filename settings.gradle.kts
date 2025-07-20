@@ -4,6 +4,6 @@ plugins {
 
 rootProject.name = "lightweight"
 
-include("lightweight-core", "lightweight-lib", "lightweight-userdev")
+include("lightweight-core", "paperweight-lib", "lightweight-userdev")
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")

@@ -40,7 +40,7 @@ fun ShadowJar.configureStandard() {
 
 val sourcesJar by tasks.existing(AbstractArchiveTask::class) {
     from(
-        zipTree(project(":lightweight-lib").tasks
+        zipTree(project(":paperweight-lib").tasks
             .named("sourcesJar", AbstractArchiveTask::class)
             .flatMap { it.archiveFile })
     ) {
@@ -98,8 +98,8 @@ publishing {
         maven("https://repo.menthamc.com/repository/maven-snapshots/") {
             name = "MenthaMC"
             credentials(PasswordCredentials::class) {
-                username = System.getenv("MAVEN_USERNAME")
-                password = System.getenv("MAVEN_PASSWORD")
+                username = System.getenv("PRIVATE_MAVEN_REPO_USERNAME")
+                password = System.getenv("PRIVATE_MAVEN_REPO_PASSWORD")
             }
         }
     }
