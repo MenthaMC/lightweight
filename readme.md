@@ -1,6 +1,6 @@
-## paperweight
+## lightweight
 
-`paperweight` consists of three Gradle plugins:
+`lightweight` consists of three Gradle plugins:
 - `paperweight-core`: Used to build Paper
 - `paperweight-patcher`: Used to create forks of Paper or other `paperweight-patcher`-based forks
 - `paperweight-userdev`: Used to develop internals plugins using Mojang mappings

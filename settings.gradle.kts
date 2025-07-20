@@ -2,8 +2,8 @@ plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
-rootProject.name = "paperweight"
+rootProject.name = "lightweight"
 
-include("paperweight-core", "paperweight-lib", "paperweight-userdev")
+include("lightweight-core", "lightweight-lib", "lightweight-userdev")
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
