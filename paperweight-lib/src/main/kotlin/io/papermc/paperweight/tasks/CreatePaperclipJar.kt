@@ -67,6 +67,9 @@ abstract class CreatePaperclipJar : JavaLauncherZippedTask() {
     @get:Inject
     abstract val workerExecutor: WorkerExecutor
 
+    @get:Input
+    abstract val rootProjectName: Property<String>
+
     override fun init() {
         super.init()
 
@@ -102,6 +105,13 @@ abstract class CreatePaperclipJar : JavaLauncherZippedTask() {
         val contextCN = DownloadContext(vanillaSha256Hash, vanillaUrlCn, vanillaFileName)
         rootDir.resolve(DownloadContext.FILE).writeText(context.toString())
         rootDir.resolve(DownloadContext.FILE_CN).writeText(contextCN.toString())
+
+        val buildInfo = BuildInfo(
+            rootProjectName.get(),
+            mcVersion.get(),
+            System.getenv("BUILD_NUMBER") ?: "DEV"
+        )
+        rootDir.resolve(BuildInfo.FILE).writeText(buildInfo.toString())
     }
 
     private fun createPatches(rootDir: Path, newBundlerRoot: Path, originalBundlerRoot: Path): List<PatchEntry> {
@@ -322,6 +332,16 @@ abstract class CreatePaperclipJar : JavaLauncherZippedTask() {
         companion object {
             const val FILE = "META-INF/download-context"
             const val FILE_CN = "META-INF/download-context-cn"
+        }
+    }
+
+    data class BuildInfo(val projectName: String, val mcVersion: String, val buildId: String) {
+        override fun toString(): String {
+            return "$projectName\t$mcVersion\t$buildId"
+        }
+
+        companion object {
+            const val FILE = "META-INF/build-info"
         }
     }
 }

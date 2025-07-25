@@ -75,6 +75,7 @@ class PaperclipTasks(
             group = "bundling"
             description = "Build a runnable bundler jar"
 
+            rootProjectName.set(project.rootProject.name)
             paperclip.from(configurations.named(PAPERCLIP_CONFIG))
             mainClass.set(mainClassString)
             extraManifestMainAttributes.convention(mapOf("Enable-Native-Access" to "ALL-UNNAMED"))
@@ -148,6 +149,8 @@ class PaperclipTasks(
         originalBundlerJar.set(vanillaJar)
         bundlerJar.set(createBundlerJar.flatMap { it.outputZip })
         mcVersion.set(this@PaperclipTasks.mcVersion)
+        rootProjectName.set(project.rootProject.name)
+
 
         op.execute(this)
     }
