@@ -75,7 +75,6 @@ class PaperclipTasks(
             group = "bundling"
             description = "Build a runnable bundler jar"
 
-            rootProjectName.set(project.rootProject.name)
             paperclip.from(configurations.named(PAPERCLIP_CONFIG))
             mainClass.set(mainClassString)
             extraManifestMainAttributes.convention(mapOf("Enable-Native-Access" to "ALL-UNNAMED"))
@@ -86,6 +85,7 @@ class PaperclipTasks(
             group = "bundling"
             description = "Build a runnable paperclip jar"
 
+            rootProjectName.set(project.rootProject.name)
             libraryChangesJson.set(bundlerJarTask.flatMap { it.libraryChangesJson })
             outputZip.set(layout.buildDirectory.file(jarName("paperclip", classifier).map { "libs/$it" }))
         }
