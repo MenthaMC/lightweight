@@ -103,7 +103,7 @@ abstract class ApplyFilePatches : BaseTask() {
     }
 
     @TaskAction
-    open fun run() {
+    open fun run(): Int {
         io.papermc.paperweight.util.Git.checkForGit()
 
         val outputPath = output.path
@@ -141,6 +141,8 @@ abstract class ApplyFilePatches : BaseTask() {
         if (!verbose.get()) {
             logger.lifecycle("Applied $result patches")
         }
+
+        return result
     }
 
     private fun recreateCloneDirectory(target: Path) {
@@ -171,6 +173,13 @@ abstract class ApplyFilePatches : BaseTask() {
     private fun applyWithGit(outputPath: Path): Int {
         val git = Git(outputPath)
         val patchFiles = patches.path.filesMatchingRecursive("*.patch")
+
+        if (patchFiles.isEmpty()) {
+            logger.lifecycle("No patch files found in ${patches.path}, skipping patch application")
+            commit()
+            return 0
+        }
+        
         if (moveFailedGitPatchesToRejects.get() && rejectsDir.isPresent) {
             patchFiles.forEach { patch ->
                 val patchPathFromGit = outputPath.relativize(patch)
