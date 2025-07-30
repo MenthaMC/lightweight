@@ -171,6 +171,13 @@ abstract class ApplyFilePatches : BaseTask() {
     private fun applyWithGit(outputPath: Path): Int {
         val git = Git(outputPath)
         val patchFiles = patches.path.filesMatchingRecursive("*.patch")
+
+        if (patchFiles.isEmpty()) {
+            logger.lifecycle("No patch files found in ${patches.path}, skipping patch application")
+            commit()
+            return 0
+        }
+        
         if (moveFailedGitPatchesToRejects.get() && rejectsDir.isPresent) {
             patchFiles.forEach { patch ->
                 val patchPathFromGit = outputPath.relativize(patch)
