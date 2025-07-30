@@ -109,7 +109,7 @@ abstract class ApplyFeaturePatches : ControllableOutputTask() {
 
         git("am", "--abort").runSilently(silenceErr = true)
 
-        val patches = patchDir?.useDirectoryEntries("*.patch") { it.toMutableList() } ?: mutableListOf()
+        val patches = patchDir?.takeIf { it.exists() }?.useDirectoryEntries("*.patch") { it.toMutableList() } ?: mutableListOf()
         if (patches.isEmpty()) {
             if (printOutput) {
                 logger.lifecycle("No patches found")
