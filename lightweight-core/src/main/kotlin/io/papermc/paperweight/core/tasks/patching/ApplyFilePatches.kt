@@ -32,6 +32,8 @@ import io.papermc.paperweight.util.*
 import java.io.PrintStream
 import java.nio.file.Path
 import java.time.Instant
+import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.io.path.*
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.lib.PersonIdent
@@ -181,7 +183,9 @@ abstract class ApplyFilePatches : BaseTask() {
         }
         
         if (moveFailedGitPatchesToRejects.get() && rejectsDir.isPresent) {
-            patchFiles.forEach { patch ->
+            val failedPatches = ConcurrentLinkedQueue<Pair<Path, Path>>()
+
+            patchFiles.parallelStream().forEach { patch ->
                 val patchPathFromGit = outputPath.relativize(patch)
                 val responseCode =
                     git(
@@ -202,10 +206,14 @@ abstract class ApplyFilePatches : BaseTask() {
                             git("restore", failedFile.pathString).executeSilently(silenceOut = !verbose.get(), silenceErr = !verbose.get())
                         }
 
-                        val rejectFile = rejectsDir.path.resolve(relativePatch)
-                        patch.moveTo(rejectFile.createParentDirectories(), overwrite = true)
+                        failedPatches.add(Pair(patch, relativePatch))
                     }
                 }
+            }
+
+            failedPatches.forEach { (patch, relativePatch) ->
+                val rejectFile = rejectsDir.path.resolve(relativePatch)
+                patch.moveTo(rejectFile.createParentDirectories(), overwrite = true)
             }
         } else {
             val patchStrings = patchFiles.map { outputPath.relativize(it).pathString }

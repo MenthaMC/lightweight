@@ -111,6 +111,8 @@ class MinecraftPatchingTasks(
         group()
         description = "Applies all $configName Minecraft file patches"
         dependsOn(applySourcePatches, applyResourcePatches)
+        applySourcePatches.get().onlyIf { true }
+        applyResourcePatches.get().onlyIf { true }
     }
 
     val applyFeaturePatches = tasks.register<ApplyFeaturePatches>("apply${namePart}FeaturePatches") {
@@ -123,12 +125,15 @@ class MinecraftPatchingTasks(
         }
         repo.set(outputSrc)
         patches.set(featurePatchDir.fileExists(project))
+        applyFilePatches.get().onlyIf { true }
     }
 
     val applyPatches = tasks.register<Task>("apply${namePart}Patches") {
         group()
         description = "Applies all $configName Minecraft patches"
         dependsOn(applyFilePatches, applyFeaturePatches)
+        applyFilePatches.get().onlyIf { true }
+        applyFeaturePatches.get().onlyIf { true }
     }
 
     val rebuildSourcePatchesName = "rebuild${namePart}SourcePatches"
@@ -228,6 +233,8 @@ class MinecraftPatchingTasks(
             group()
             description = "Rebuilds all $configName file patches to Minecraft"
             dependsOn(rebuildSourcePatches, rebuildResourcePatches)
+            rebuildSourcePatches.get().onlyIf { true }
+            rebuildResourcePatches.get().onlyIf { true }
         }
 
         val rebuildFeaturePatches = tasks.register<RebuildGitPatches>(rebuildFeaturePatchesName) {
@@ -239,12 +246,15 @@ class MinecraftPatchingTasks(
             patchDir.set(featurePatchDir)
             baseRef.set("file")
             filterPatches.set(this@MinecraftPatchingTasks.filterPatches)
+            rebuildFilePatches.get().onlyIf { true }
         }
 
         val rebuildPatches = tasks.register<Task>(rebuildPatchesName) {
             group()
             description = "Rebuilds all $configName patches to Minecraft"
             dependsOn(rebuildFilePatches, rebuildFeaturePatches)
+            rebuildFilePatches.get().onlyIf { true }
+            rebuildFeaturePatches.get().onlyIf { true }
         }
 
         val fixupSourcePatches = tasks.register<FixupFilePatches>("fixup${namePart}SourcePatches") {

@@ -257,22 +257,20 @@ class CoreTasks(
             )
 
             if (activeFork) {
-                // setup output name conventions
                 project.coreExt.bundlerJarName.convention(cfg.name)
 
-                // setup aggregate -server patching tasks
                 upstreamConfigTasks.setupAggregateTasks(
                     "Server",
                     cfg.upstream.directoryPatchSets.names.joinToString(", ")
                 )
 
-                // setup aggregate Minecraft & upstream -server patching tasks
                 val applyAllServerFilePatches = project.tasks.register("applyAllServerFilePatches") {
                     group = "patching"
                     description = "Applies all Minecraft and upstream server file patches " +
                         "(equivalent to '${serverTasks.applyFilePatches.name} applyServerFilePatches')"
                     dependsOn(serverTasks.applyFilePatches)
                     dependsOn("applyServerFilePatches")
+                    serverTasks.applyFilePatches.get().onlyIf { true }
                 }
                 val applyAllServerFeaturePatches = project.tasks.register("applyAllServerFeaturePatches") {
                     group = "patching"
@@ -280,6 +278,7 @@ class CoreTasks(
                         "(equivalent to '${serverTasks.applyFeaturePatches.name} applyServerFeaturePatches')"
                     dependsOn(serverTasks.applyFeaturePatches)
                     dependsOn("applyServerFeaturePatches")
+                    serverTasks.applyFeaturePatches.get().onlyIf { true }
                 }
                 val applyAllServerPatches = project.tasks.register("applyAllServerPatches") {
                     group = "patching"
@@ -287,6 +286,7 @@ class CoreTasks(
                         "(equivalent to '${serverTasks.applyPatches.name} applyServerPatches')"
                     dependsOn(serverTasks.applyPatches)
                     dependsOn("applyServerPatches")
+                    serverTasks.applyPatches.get().onlyIf { true }
                 }
                 val rebuildAllServerFilePatches = project.tasks.register("rebuildAllServerFilePatches") {
                     group = "patching"
@@ -294,6 +294,7 @@ class CoreTasks(
                         "(equivalent to '${serverTasks.rebuildFilePatchesName} rebuildServerFilePatches')"
                     dependsOn(serverTasks.rebuildFilePatchesName)
                     dependsOn("rebuildServerFilePatches")
+                    project.tasks.named(serverTasks.rebuildFilePatchesName).get().onlyIf { true }
                 }
                 val rebuildAllServerFeaturePatches = project.tasks.register("rebuildAllServerFeaturePatches") {
                     group = "patching"
@@ -301,6 +302,7 @@ class CoreTasks(
                         "(equivalent to '${serverTasks.rebuildFeaturePatchesName} rebuildServerFeaturePatches')"
                     dependsOn(serverTasks.rebuildFeaturePatchesName)
                     dependsOn("rebuildServerFeaturePatches")
+                    project.tasks.named(serverTasks.rebuildFeaturePatchesName).get().onlyIf { true }
                 }
                 val rebuildAllServerPatches = project.tasks.register("rebuildAllServerPatches") {
                     group = "patching"
@@ -308,6 +310,7 @@ class CoreTasks(
                         "(equivalent to '${serverTasks.rebuildPatchesName} rebuildServerPatches')"
                     dependsOn(serverTasks.rebuildPatchesName)
                     dependsOn("rebuildServerPatches")
+                    project.tasks.named(serverTasks.rebuildPatchesName).get().onlyIf { true }
                 }
             }
 

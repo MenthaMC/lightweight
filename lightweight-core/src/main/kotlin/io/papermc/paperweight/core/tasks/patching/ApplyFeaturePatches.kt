@@ -125,7 +125,7 @@ abstract class ApplyFeaturePatches : ControllableOutputTask() {
             val mailDir = tempDir.resolve("new")
             mailDir.createDirectories()
 
-            for (patch in patches) {
+            patches.parallelStream().forEach { patch ->
                 patch.copyTo(mailDir.resolve(patch.fileName))
             }
 

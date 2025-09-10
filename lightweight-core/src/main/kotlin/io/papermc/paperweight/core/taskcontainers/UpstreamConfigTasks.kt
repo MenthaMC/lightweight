@@ -175,6 +175,7 @@ class UpstreamConfigTasks(
             description = "Applies $desc file patches"
             patchingTasks.values.forEach { t ->
                 dependsOn(t.applyFilePatches)
+                t.applyFilePatches.get().onlyIf { true }
             }
         }
         val applyFeature = target.tasks.register("apply${namePart}FeaturePatches") {
@@ -182,6 +183,7 @@ class UpstreamConfigTasks(
             description = "Applies $desc feature patches"
             patchingTasks.values.forEach { t ->
                 dependsOn(t.applyFeaturePatches)
+                t.applyFeaturePatches.get().onlyIf { true }
             }
         }
         val rebuildFile = target.tasks.register("rebuild${namePart}FilePatches") {
@@ -189,6 +191,7 @@ class UpstreamConfigTasks(
             description = "Rebuilds $desc file patches"
             patchingTasks.values.forEach { t ->
                 dependsOn(t.rebuildFilePatchesName)
+                target.tasks.named(t.rebuildFilePatchesName).get().onlyIf { true }
             }
         }
         val rebuildFeature = target.tasks.register("rebuild${namePart}FeaturePatches") {
@@ -196,6 +199,7 @@ class UpstreamConfigTasks(
             description = "Applies $desc feature patches"
             patchingTasks.values.forEach { t ->
                 dependsOn(t.rebuildFeaturePatchesName)
+                target.tasks.named(t.rebuildFeaturePatchesName).get().onlyIf { true }
             }
         }
         val apply = target.tasks.register("apply${namePart}Patches") {
@@ -204,6 +208,7 @@ class UpstreamConfigTasks(
             applySingleFilePatches?.let { t -> dependsOn(t) }
             patchingTasks.values.forEach { t ->
                 dependsOn(t.applyPatches)
+                t.applyPatches.get().onlyIf { true }
             }
         }
         val rebuild = target.tasks.register("rebuild${namePart}Patches") {
@@ -212,6 +217,7 @@ class UpstreamConfigTasks(
             rebuildSingleFilePatches?.let { t -> dependsOn(t) }
             patchingTasks.values.forEach { t ->
                 dependsOn(t.rebuildPatchesName)
+                target.tasks.named(t.rebuildPatchesName).get().onlyIf { true }
             }
         }
     }

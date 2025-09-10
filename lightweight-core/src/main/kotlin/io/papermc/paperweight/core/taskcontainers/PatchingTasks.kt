@@ -91,12 +91,15 @@ class PatchingTasks(
             base.set(applyFilePatches.flatMap { it.output })
         }
         patches.set(featurePatchDir.fileExists(project))
+        applyFilePatches.get().onlyIf { true }
     }
 
     val applyPatches = tasks.register<Task>("apply${namePart}Patches") {
         group = taskGroup
         description = "Applies all $patchSetName patches"
         dependsOn(applyFilePatches, applyFeaturePatches)
+        applyFilePatches.get().onlyIf { true }
+        applyFeaturePatches.get().onlyIf { true }
     }
 
     val rebuildFilePatchesName = "rebuild${namePart}FilePatches"
@@ -148,12 +151,15 @@ class PatchingTasks(
             patchDir.set(featurePatchDir)
             baseRef.set("file")
             filterPatches.set(this@PatchingTasks.filterPatches)
+            rebuildFilePatches.get().onlyIf { true }
         }
 
         val rebuildPatches = tasks.register<Task>(rebuildPatchesName) {
             group = taskGroup
             description = "Rebuilds all $patchSetName patches"
             dependsOn(rebuildFilePatches, rebuildFeaturePatches)
+            rebuildFilePatches.get().onlyIf { true }
+            rebuildFeaturePatches.get().onlyIf { true }
         }
 
         val applyOrMoveFilePatches = tasks.register<ApplyFilePatches>("applyOrMove${namePart}FilePatches") {

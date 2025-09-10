@@ -1,9 +1,9 @@
 ## lightweight
 
 `lightweight` consists of three Gradle plugins:
-- `paperweight-core`: Used to build Paper
-- `paperweight-patcher`: Used to create forks of Paper or other `paperweight-patcher`-based forks
-- `paperweight-userdev`: Used to develop internals plugins using Mojang mappings
+- `lightweight-core`: Used to build Paper
+- `lightweight-patcher`: Used to create forks of Paper or other `lightweight-patcher`-based forks
+- `lightweight-userdev`: Used to develop internals plugins using Mojang mappings
 
 ### How to use this for testing:
 

@@ -30,6 +30,7 @@ import io.papermc.paperweight.core.util.defaultMinFuzz
 import io.papermc.paperweight.tasks.*
 import io.papermc.paperweight.util.*
 import java.io.PrintStream
+import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 import kotlin.io.path.*
 import org.gradle.api.Action
@@ -107,57 +108,67 @@ abstract class ApplySingleFilePatches : BaseTask() {
     @TaskAction
     fun run() {
         temporaryDir.toPath().cleanDir()
-        var fail = false
-        for ((index, patch) in patches.get().withIndex()) {
-            val tmp = temporaryDir.toPath().resolve(index.toString()).cleanDir()
-            val tmpWork = tmp.resolve("work")
-            val tmpPatch = tmp.resolve("patch")
-            val tmpRej = tmp.resolve("rejects")
-            val log = tmp.resolve("log.txt")
 
-            val workFile = tmpWork.resolve(patch.path.get()).createParentDirectories()
-            upstream.path.resolve(patch.path.get())
-                .copyTo(workFile, true)
+        val results = patches.get().parallelStream().map { patch ->
+            processPatch(patch)
+        }.toList()
 
-            if (patch.patchFile.isPresent) {
-                patch.patchFile.path.copyTo(tmpPatch.resolve(patch.path.get() + ".patch").createParentDirectories(), true)
+        val failed = results.filter { it != null }
+        if (failed.isNotEmpty()) {
+            throw PaperweightException("Patch apply failures: ${failed.joinToString(", ")}")
+        }
+    }
 
-                val result = PrintStream(log.toFile(), Charsets.UTF_8).use { logOut ->
-                    val op = PatchOperation.builder()
-                        .logTo(logOut)
-                        .level(LogLevel.ALL)
-                        .mode(mode.get())
-                        .minFuzz(minFuzz.get().toFloat())
-                        .summary(false)
-                        .basePath(tmpWork)
-                        .patchesPath(tmpPatch)
-                        .outputPath(tmpWork)
-                        .rejectsPath(tmpRej)
-                        .build()
+    private val tempDirCounter = AtomicInteger(0)
 
-                    op.operate()
-                }
+    private fun processPatch(patch: Patch): String? {
+        val tmp = temporaryDir.toPath().resolve(tempDirCounter.getAndIncrement().toString()).cleanDir()
+        val tmpWork = tmp.resolve("work")
+        val tmpPatch = tmp.resolve("patch")
+        val tmpRej = tmp.resolve("rejects")
+        val log = tmp.resolve("log.txt")
 
-                workFile.copyTo(patch.outputFile.path.createParentDirectories(), true)
+        val workFile = tmpWork.resolve(patch.path.get()).createParentDirectories()
+        upstream.path.resolve(patch.path.get())
+            .copyTo(workFile, true)
 
-                val rej = tmpRej.resolve(patch.path.get() + ".patch.rej")
-                if (rej.exists()) {
-                    rej.copyTo(patch.rejectsFile.path.createParentDirectories(), true)
-                } else {
-                    rej.deleteIfExists()
-                }
+        if (patch.patchFile.isPresent) {
+            patch.patchFile.path.copyTo(tmpPatch.resolve(patch.path.get() + ".patch").createParentDirectories(), true)
 
-                if (result.exit != 0) {
-                    fail = true
-                    logger.error("Patch ${patch.patchFile.path} failed:\n" + log.readText())
-                }
-            } else {
-                upstream.path.resolve(patch.path.get())
-                    .copyTo(patch.outputFile.path.createParentDirectories(), true)
+            val result = PrintStream(log.toFile(), Charsets.UTF_8).use { logOut ->
+                val op = PatchOperation.builder()
+                    .logTo(logOut)
+                    .level(LogLevel.ALL)
+                    .mode(mode.get())
+                    .minFuzz(minFuzz.get().toFloat())
+                    .summary(false)
+                    .basePath(tmpWork)
+                    .patchesPath(tmpPatch)
+                    .outputPath(tmpWork)
+                    .rejectsPath(tmpRej)
+                    .build()
+
+                op.operate()
             }
+
+            workFile.copyTo(patch.outputFile.path.createParentDirectories(), true)
+
+            val rej = tmpRej.resolve(patch.path.get() + ".patch.rej")
+            if (rej.exists()) {
+                rej.copyTo(patch.rejectsFile.path.createParentDirectories(), true)
+            } else {
+                rej.deleteIfExists()
+            }
+
+            if (result.exit != 0) {
+                logger.error("Patch ${patch.patchFile.path} failed:\n" + log.readText())
+                return patch.patchFile.path.toString()
+            }
+        } else {
+            upstream.path.resolve(patch.path.get())
+                .copyTo(patch.outputFile.path.createParentDirectories(), true)
         }
-        if (fail) {
-            throw PaperweightException("Patch apply failures, review the log above")
-        }
+
+        return null // success
     }
 }
