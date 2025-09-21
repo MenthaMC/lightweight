@@ -66,7 +66,7 @@ class PatchingTasks(
         } else {
             output.set(outputDir)
         }
-        patches.set(filePatchDir.fileExists(project))
+        patches.set(filePatchDir.fileExists())
         rejectsDir.set(this@PatchingTasks.rejectsDir)
         gitFilePatches.set(this@PatchingTasks.gitFilePatches)
         baseRef.set("base")
@@ -90,16 +90,13 @@ class PatchingTasks(
         if (readOnly) {
             base.set(applyFilePatches.flatMap { it.output })
         }
-        patches.set(featurePatchDir.fileExists(project))
-        applyFilePatches.get().onlyIf { true }
+        patches.set(featurePatchDir.fileExists())
     }
 
     val applyPatches = tasks.register<Task>("apply${namePart}Patches") {
         group = taskGroup
         description = "Applies all $patchSetName patches"
         dependsOn(applyFilePatches, applyFeaturePatches)
-        applyFilePatches.get().onlyIf { true }
-        applyFeaturePatches.get().onlyIf { true }
     }
 
     val rebuildFilePatchesName = "rebuild${namePart}FilePatches"
@@ -151,15 +148,12 @@ class PatchingTasks(
             patchDir.set(featurePatchDir)
             baseRef.set("file")
             filterPatches.set(this@PatchingTasks.filterPatches)
-            rebuildFilePatches.get().onlyIf { true }
         }
 
         val rebuildPatches = tasks.register<Task>(rebuildPatchesName) {
             group = taskGroup
             description = "Rebuilds all $patchSetName patches"
             dependsOn(rebuildFilePatches, rebuildFeaturePatches)
-            rebuildFilePatches.get().onlyIf { true }
-            rebuildFeaturePatches.get().onlyIf { true }
         }
 
         val applyOrMoveFilePatches = tasks.register<ApplyFilePatches>("applyOrMove${namePart}FilePatches") {
